@@ -3,6 +3,7 @@ const http = require("http");
 const dotenv = require("dotenv");
 const socketio = require("socket.io");
 const cors = require("cors");
+const bodyParser = require("body-parser");
 const mqttClient = require("./mqtt/mqtt.jsx");
 const {
   insertSensorData,
@@ -21,6 +22,7 @@ const buttonsStateRoute = require("./routes/buttonsStateRoutes.jsx");
 const fingerDataRoute = require("./routes/fingerDataRoutes.jsx");
 const fingerScanDataRoute = require("./routes/fingerScanDataRoutes.jsx");
 const sensorDataRoute = require("./routes/sensorDataRoutes.jsx");
+const authUser = require("./routes/authUser.jsx");
 
 const app = express();
 const server = http.createServer(app);
@@ -31,6 +33,7 @@ const io = socketio(server, {
   },
 });
 app.use(cors());
+app.use(bodyParser.json());
 const port = process.env.PORT;
 
 mqttClient.on("connect", () => {
@@ -145,5 +148,6 @@ app.use("/api/buttonsState", buttonsStateRoute);
 app.use("/api/fingerData", fingerDataRoute);
 app.use("/api/fingerScanData", fingerScanDataRoute);
 app.use("/api/sensorData", sensorDataRoute);
+app.use("/api/user", authUser);
 
 server.listen(port, () => console.log(`Server listening on port: ${port}`));

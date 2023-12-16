@@ -4,7 +4,7 @@ const dbConnection = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",
-  database: "data_sensors",
+  database: "smarthome",
 });
 dbConnection.connect((err) => {
   if (err) {
@@ -16,6 +16,7 @@ dbConnection.connect((err) => {
     createHistoryScanTableIfNotExists();
     createButtonsStateTableIfNotExists();
     createAutoModeStateTableIfNotExists();
+    createUserTableIfNotExists();
   }
 });
 
@@ -137,6 +138,74 @@ function createAutoModeStateTableIfNotExists() {
           console.log("Inserted initial values into auto_mode");
         }
       });
+    }
+  });
+}
+
+function createUserTableIfNotExists() {
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      username VARCHAR(255) UNIQUE,
+      email VARCHAR(255) UNIQUE,
+      password VARCHAR(255),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+  dbConnection.query(createTableQuery, (err) => {
+    if (err) {
+      console.error("Error creating users table:", err);
+    }
+  });
+}
+
+function insertUserData(userData, callback) {
+  const { username, email, password } = userData;
+  const checkQuery = `
+    SELECT * FROM users WHERE email = ? OR username = ?;
+  `;
+  const values = [email, username];
+
+  dbConnection.query(checkQuery, values, (checkErr, checkResult) => {
+    if (checkErr) {
+      console.error("Error checking existing user:", checkErr);
+      callback("Internal Server Error", null);
+    } else if (checkResult.length > 0) {
+      const existingUser = checkResult[0];
+      const takenField = existingUser.email === email ? "Email" : "Username";
+      callback(`${takenField} is already taken`, null);
+    } else {
+      const insertQuery = `
+        INSERT INTO users (username, email, password) VALUES (?, ?, ?);
+      `;
+      const insertValues = [username, email, password];
+      dbConnection.query(insertQuery, insertValues, (err, result) => {
+        if (err) {
+          console.error("Error inserting user data into MySQL:", err);
+          callback("Internal Server Error", null);
+        } else {
+          console.log(`Inserted user data for ${username}`);
+          callback(null, "User registered successfully");
+        }
+      });
+    }
+  });
+}
+
+function findUserByUsername(username, callback) {
+  const selectQuery = `
+    SELECT * FROM users
+    WHERE username = ?;
+  `;
+  const values = [username];
+
+  dbConnection.query(selectQuery, values, (err, result) => {
+    if (err) {
+      console.error("Error fetching user data by username:", err);
+      callback(err, null);
+    } else {
+      const user = result.length > 0 ? result[0] : null;
+      callback(null, user);
     }
   });
 }
@@ -405,6 +474,7 @@ module.exports = {
   insertSensorData,
   insertFingerData,
   insertHistoryScanData,
+  insertUserData,
   deleteFingerDataById,
   getFingerData,
   getFingerScanData,
@@ -413,4 +483,5 @@ module.exports = {
   updateAutoMode,
   getAutoMode,
   getAverageSensorData,
+  findUserByUsername,
 };
