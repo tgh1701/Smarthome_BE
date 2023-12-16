@@ -93,21 +93,22 @@ function createButtonsStateTableIfNotExists() {
     INSERT INTO buttons_state (Bedroom, Relay2, Livingroom, Relay3, Door, Kitchen, Relay1, ServoRain)
     VALUES (0, 0, 0, 0, 0, 0, 0, 0);
   `;
-
-  dbConnection.query(createTableQuery, (err) => {
+  dbConnection.query(createTableQuery, (err, results) => {
     if (err) {
       console.error("Error creating buttons_state table:", err);
     } else {
-      dbConnection.query(insertQuery, (insertErr) => {
-        if (insertErr) {
-          console.error(
-            "Error inserting initial values into buttons_state:",
-            insertErr
-          );
-        } else {
-          console.log("Inserted initial values into buttons_state");
-        }
-      });
+      if (results && results.warningCount === 0) {
+        dbConnection.query(insertQuery, (insertErr) => {
+          if (insertErr) {
+            console.error(
+              "Error inserting initial values into buttons_state:",
+              insertErr
+            );
+          } else {
+            console.log("Inserted initial values into buttons_state");
+          }
+        });
+      }
     }
   });
 }
@@ -124,20 +125,22 @@ function createAutoModeStateTableIfNotExists() {
     INSERT INTO auto_mode (rain, water)
     VALUES (0, 0);
   `;
-  dbConnection.query(createTableQuery, (err) => {
+  dbConnection.query(createTableQuery, (err, results) => {
     if (err) {
       console.error("Error creating auto_mode table:", err);
     } else {
-      dbConnection.query(insertQuery, (insertErr) => {
-        if (insertErr) {
-          console.error(
-            "Error inserting initial values into auto_mode:",
-            insertErr
-          );
-        } else {
-          console.log("Inserted initial values into auto_mode");
-        }
-      });
+      if (results && results.warningCount === 0) {
+        dbConnection.query(insertQuery, (insertErr) => {
+          if (insertErr) {
+            console.error(
+              "Error inserting initial values into auto_mode:",
+              insertErr
+            );
+          } else {
+            console.log("Inserted initial values into auto_mode");
+          }
+        });
+      }
     }
   });
 }
@@ -155,6 +158,23 @@ function createUserTableIfNotExists() {
   dbConnection.query(createTableQuery, (err) => {
     if (err) {
       console.error("Error creating users table:", err);
+    }
+  });
+}
+
+function findUserByUsername(username, callback) {
+  const selectQuery = `
+    SELECT * FROM users
+    WHERE username = ?;
+  `;
+  const values = [username];
+  dbConnection.query(selectQuery, values, (err, result) => {
+    if (err) {
+      console.error("Error fetching user data by username:", err);
+      callback(err, null);
+    } else {
+      const user = result.length > 0 ? result[0] : null;
+      callback(null, user);
     }
   });
 }
@@ -188,24 +208,6 @@ function insertUserData(userData, callback) {
           callback(null, "User registered successfully");
         }
       });
-    }
-  });
-}
-
-function findUserByUsername(username, callback) {
-  const selectQuery = `
-    SELECT * FROM users
-    WHERE username = ?;
-  `;
-  const values = [username];
-
-  dbConnection.query(selectQuery, values, (err, result) => {
-    if (err) {
-      console.error("Error fetching user data by username:", err);
-      callback(err, null);
-    } else {
-      const user = result.length > 0 ? result[0] : null;
-      callback(null, user);
     }
   });
 }
@@ -418,7 +420,6 @@ function updateAutoMode(topic, newState) {
               insertErr
             );
           } else {
-            console.log("Inserted initial values into auto_mode");
             const updateQuery = `
               UPDATE auto_mode SET ${autoModeType} = ?;
             `;
@@ -478,10 +479,10 @@ module.exports = {
   deleteFingerDataById,
   getFingerData,
   getFingerScanData,
-  updateButtonsState,
   getButtonsState,
-  updateAutoMode,
   getAutoMode,
   getAverageSensorData,
+  updateButtonsState,
+  updateAutoMode,
   findUserByUsername,
 };
