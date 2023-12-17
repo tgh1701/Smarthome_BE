@@ -16,6 +16,7 @@ const {
 const {
   sendEmailWarningHome,
   sendEmailWarningGarage,
+  sendEmailGasWarningHome,
 } = require("./email/email.jsx");
 const autoModeRoute = require("./routes/autoModeRoutes.jsx");
 const buttonsStateRoute = require("./routes/buttonsStateRoutes.jsx");
@@ -63,10 +64,12 @@ mqttClient.on("connect", () => {
 mqttClient.on("message", (topic, payload) => {
   if (topic.startsWith("sensorsData")) {
     const sensorsData = JSON.parse(payload.toString());
-    if (sensorsData.MQ2 > 100 || sensorsData.Fire == 0) {
+    if (sensorsData.Fire == 0) {
       sendEmailWarningHome();
-    } else if (sensorsData.MQ5 > 100) {
+    } else if (sensorsData.MQ5 > 1000) {
       sendEmailWarningGarage();
+    } else if (sensorsData.MQ2 > 1000) {
+      sendEmailGasWarningHome();
     }
     io.emit("sensorsData", { topic, payload: sensorsData });
     insertSensorData(sensorsData);
