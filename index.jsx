@@ -22,7 +22,7 @@ const buttonsStateRoute = require("./routes/buttonsStateRoutes.jsx");
 const fingerDataRoute = require("./routes/fingerDataRoutes.jsx");
 const fingerScanDataRoute = require("./routes/fingerScanDataRoutes.jsx");
 const sensorDataRoute = require("./routes/sensorDataRoutes.jsx");
-const authUser = require("./routes/authUser.jsx");
+const authUserRoute = require("./routes/authUserRoutes.jsx");
 
 const app = express();
 const server = http.createServer(app);
@@ -148,6 +148,6 @@ app.use("/api/buttonsState", buttonsStateRoute);
 app.use("/api/fingerData", fingerDataRoute);
 app.use("/api/fingerScanData", fingerScanDataRoute);
 app.use("/api/sensorData", sensorDataRoute);
-app.use("/api/user", authUser);
+app.use("/api/user", authUserRoute);
 
 server.listen(port, () => console.log(`Server listening on port: ${port}`));
