@@ -66,9 +66,9 @@ mqttClient.on("message", (topic, payload) => {
     const sensorsData = JSON.parse(payload.toString());
     if (sensorsData.Fire == 0) {
       sendEmailWarningHome();
-    } else if (sensorsData.MQ5 > 1000) {
+    } else if (sensorsData.MQ5 > 1500) {
       sendEmailWarningGarage();
-    } else if (sensorsData.MQ2 > 1000) {
+    } else if (sensorsData.MQ2 > 1500) {
       sendEmailGasWarningHome();
     }
     io.emit("sensorsData", { topic, payload: sensorsData });
