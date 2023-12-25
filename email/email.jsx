@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-function sendEmailWarningHome() {
+function sendEmailWarningHouse() {
   const mailOptions = {
     from: "2tghgames@gmail.com",
     to: "tgh1701@gmail.com",
@@ -27,7 +27,7 @@ function sendEmailWarningHome() {
   });
 }
 
-function sendEmailGasWarningHome() {
+function sendEmailGasWarningHouse() {
   const mailOptions = {
     from: "2tghgames@gmail.com",
     to: "tgh1701@gmail.com",
@@ -44,13 +44,13 @@ function sendEmailGasWarningHome() {
   });
 }
 
-function sendEmailWarningGarage() {
+function sendEmailGasWarningGarage() {
   const mailOptions = {
     from: "2tghgames@gmail.com",
     to: "tgh1701@gmail.com",
     subject: "GAS LEAK!!!",
     html: `
-      <h1>GAS LEAK YOUR GARAGE!!!</h1>
+      <h1>GAS LEAK IN YOUR GARAGE!!!</h1>
       <p><img src="https://cdn-icons-png.flaticon.com/512/234/234793.png" alt="Fire Icon"></p>
     `,
   };
@@ -62,7 +62,7 @@ function sendEmailWarningGarage() {
 }
 
 module.exports = {
-  sendEmailWarningHome,
-  sendEmailWarningGarage,
-  sendEmailGasWarningHome,
+  sendEmailWarningHouse,
+  sendEmailGasWarningGarage,
+  sendEmailGasWarningHouse,
 };
